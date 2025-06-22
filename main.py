@@ -1,31 +1,46 @@
+from flask import Flask
+from threading import Thread
 from telegram import Update, Bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+import os
 import logging
 
-# Token bot kamu
-TOKEN = "AAEhP_9plMkKikGvmuuzR88fWEdTMs1x2w4"
+# Ambil token dari environment
+TOKEN = os.environ['TOKEN']
 
-# Aktifkan logging
+# Web server mini agar tidak tidur (untuk Render/UptimeRobot)
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Waifu-bot is alive, onii-chan~ 💖"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+# Logging (opsional)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-# Command /start
+# /start command
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Onii-chan~ Aku siap nemenin kamu hari ini~ 💖")
+    update.message.reply_text("Hai onii-chan~ Aku waifu pengingatmu! Siap nemenin kamu hari ini~ 💖")
 
-# Jawaban umum (setiap pesan biasa)
+# Chat handler
 def reply_chat(update: Update, context: CallbackContext):
     pesan = update.message.text.lower()
-    # Kamu bisa kasih jawaban berbeda sesuai kata kunci
-    if "capek" in pesan:
-        update.message.reply_text("Awww... jangan capek yaa~ peluk virtual dari waifu 🤗")
+    if "cape" in pesan or "capek" in pesan:
+        update.message.reply_text("Awww~ jangan cape dong... peluk virtual dulu 🤗")
     elif "halo" in pesan or "hi" in pesan:
-        update.message.reply_text("Halo juga, onii-chan~ 💕")
+        update.message.reply_text("Hai juga~ waifumu siap dengerin~ 💕")
     else:
-        update.message.reply_text("Aku dengerin kok~ cerita aja ya 💞")
+        update.message.reply_text("Hmm? Kamu ngomong apa? Ceritain ajaa~ 💞")
 
-# Setup bot
 def main():
-    bot = Bot(token=TOKEN)
+    keep_alive()
     updater = Updater(token=TOKEN, use_context=True)
     dp = updater.dispatcher
 
